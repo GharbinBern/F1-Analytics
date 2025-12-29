@@ -38,6 +38,7 @@ class Race(Base):
     __tablename__ = "races"
 
     id = Column(Integer, primary_key=True, index= True)
+
     year = Column(Integer, nullable= False)
     race_name = Column(String,  nullable= False)
     event_date = Column(DateTime, nullable= True)
@@ -74,9 +75,9 @@ class Result(Base):
     __tablename__ = 'results'
 
     id = Column(Integer, primary_key=True, index= True)
+
     race_id = Column(ForeignKey("races.id"), nullable= False)
     driver_id = Column(ForeignKey("drivers.id"), nullable= False)
-
     position = Column(Integer, nullable= True)
     grid_position = Column(Integer, nullable= True)
     points = Column(Float, nullable=True)

@@ -13,11 +13,10 @@ def transform_race_data(extracted_data):
         dict: Dictionary containing cleaned data
     """
 
-    print(f"TRANSFORM: Cleaning and formatting data...")
+    print(f"\nTRANSFORM: Cleaning and formatting data...")
 
     # Transform laps
     laps_raw = extracted_data['laps_raw']
-    results_raw = extracted_data['results_raw']
     session = extracted_data['session']
     
     # Convert timedeltas to seconds
@@ -37,19 +36,28 @@ def transform_race_data(extracted_data):
 
 
     # Transform results
+    results_raw = extracted_data['results_raw']
+
     # Select needed columns
     results_clean = results_raw[[
         'DriverNumber', 'Abbreviation', 'BroadcastName',
         'ClassifiedPosition', 'GridPosition', 'Points', 'Status', 'TeamName'
     ]].copy()
 
-    # Handle nulls
+    # Handle nulls - convert to object dtype to store Python None
     for col in ['ClassifiedPosition', 'GridPosition', 'Points']:
         if col in results_clean.columns:
-            results_clean[col] = results_clean[col].where(pd.notna(results_clean[col]), None)
+            results_clean[col] = results_clean[col].astype(object).where(pd.notna(results_clean[col]), None)
 
     results_clean['ClassifiedPosition'] = (results_clean['ClassifiedPosition']
     .replace('R', None))
+
+    # Convert to Python native types 
+    laps_clean['LapNumber'] = laps_clean['LapNumber'].astype(int)
+    laps_clean['LapTimeSeconds'] = laps_clean['LapTimeSeconds'].astype(float)
+    laps_clean['TyreLife'] = laps_clean['TyreLife'].astype('Int64')  
+    laps_clean['Stint'] = laps_clean['Stint'].astype('Int64')
+    laps_clean['IsPersonalBest'] = laps_clean['IsPersonalBest'].astype(bool)
 
     race_info = {
         'year': extracted_data['year'],
@@ -59,8 +67,6 @@ def transform_race_data(extracted_data):
         'location': session.event.get('Location'),
         'country': session.event.get('Country')
     }
-
-    print(f"Transformed {len(laps_clean)} laps, {len(results_clean)} results")
 
     return {
         'race_info': race_info,
@@ -75,7 +81,7 @@ if __name__ == "__main__":
     extracted = extract_race(2024, 'Monaco')
     transformed = transform_race_data(extracted)
     
-    print(f"\nRace info: {transformed['race_info']}")
+    print(f"Race info: {transformed['race_info']}")
     print(f"Clean laps: {len(transformed['laps_clean'])}")
-    print(f"Sample:\n{transformed['laps_clean'].head(10)}")
-    print(f"Sample:\n{transformed['results_clean'].head(20)}")
+    print(f"Sample Laps:\n{transformed['laps_clean'].head(10)}")
+    print(f"Sample Result:\n{transformed['results_clean'].head(20)}")
