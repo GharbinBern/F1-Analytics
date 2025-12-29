@@ -48,7 +48,9 @@ def transform_race_data(extracted_data):
         if col in results_clean.columns:
             results_clean[col] = results_clean[col].where(pd.notna(results_clean[col]), None)
 
-    
+    results_clean['ClassifiedPosition'] = (results_clean['ClassifiedPosition']
+    .replace('R', None))
+
     race_info = {
         'year': extracted_data['year'],
         'race_name': extracted_data['race_name'],

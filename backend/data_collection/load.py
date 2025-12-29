@@ -122,22 +122,22 @@ def load_race_data(transformed_data):
         db.commit()
         print(f"Loaded {len(results_clean)} results")
         
-        # LOAD laps
-        for _, lap_row in laps_clean.iterrows():
-            lap = Lap(
-                race_id=race.id,
-                driver_id=driver.id,
-                lap_number=lap_row['LapNumber'],
-                lap_time_seconds=lap_row['LapTimeSeconds'],
-                compound=lap_row['Compound'],
-                tyre_life=lap_row['TyreLife'],
-                stint=lap_row['Stint'],
-                team=lap_row['Team'],
-                is_personal_best=lap_row['IsPersonalBest']
-            )
-            db.add(lap)
+        # # LOAD laps
+        # for _, lap_row in laps_clean.iterrows():
+        #     lap = Lap(
+        #         race_id=race.id,
+        #         driver_id=driver.id,
+        #         lap_number=lap_row['LapNumber'],
+        #         lap_time_seconds=lap_row['LapTimeSeconds'],
+        #         compound=lap_row['Compound'],
+        #         tyre_life=lap_row['TyreLife'],
+        #         stint=lap_row['Stint'],
+        #         team=lap_row['Team'],
+        #         is_personal_best=lap_row['IsPersonalBest']
+        #     )
+        #     db.add(lap)
         
-        db.commit()
+        # db.commit()
         print(f"SUCCESS: {race_info['race_name']} loaded!")
         
     except Exception as e:
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     from extract import extract_race
     from transform import transform_race_data
 
-    extracted = extract_race(2025, 'Bahrain')
+    extracted = extract_race(2025, 'Baku')
     transformed = transform_race_data(extracted)
     success = load_race_data(transformed)
 
