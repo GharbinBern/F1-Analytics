@@ -3,6 +3,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship
 
+#SCHEMA
 Base = declarative_base()
 
 class Lap(Base):        
@@ -18,6 +19,7 @@ class Lap(Base):
     compound = Column(String, nullable= True)
     tyre_life = Column(Integer, nullable= True)
     stint = Column(Integer, nullable= True)
+    pit_in_time = Column(Float, nullable=True)
 
     team = Column(String, nullable= False)
     is_personal_best = Column(Boolean, default= False)
@@ -87,3 +89,42 @@ class Result(Base):
         return f"<Result Race:{self.race_id} P{self.position} Driver:{self.driver_id}>"
 
 
+
+
+# DATABASE SETUP
+DATABASE_URL = "sqlite:///data/database.db"
+engine = create_engine(DATABASE_URL, echo=False)
+
+def init_database():
+    """Create all tables"""
+    Base.metadata.create_all(bind=engine)
+    print("Database tables created successfully")
+
+def get_db():
+    """Get database session (for later use)"""
+    from sqlalchemy.orm import sessionmaker
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+if __name__ == "__main__":
+    # Test for database creation
+    print("Creating database...")
+    init_database()
+    
+    # Verify tables were created
+    from sqlalchemy import inspect
+    inspector = inspect(engine)
+    tables = inspector.get_table_names()
+    print(f"\nTables created: {tables}")
+    
+    # Show table columns
+    for table in tables:
+        print(f"\n{table.upper()} table columns:")
+        columns = inspector.get_columns(table)
+        for col in columns:
+            nullable = "NULL" if col['nullable'] else "NOT NULL"
+            print(f"  - {col['name']:20s} {str(col['type']):15s} {nullable}")
