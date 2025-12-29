@@ -1,7 +1,7 @@
 from sqlalchemy import (
     Column, Integer, Float, String, Boolean, ForeignKey,DateTime ,  create_engine
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 #SCHEMA
 Base = declarative_base()
@@ -63,7 +63,7 @@ class Driver(Base):
     driver_name = Column(String, nullable= False)
     driver_number = Column(Integer, nullable= False)
 
-    result = relationship("Result", back_populates = "driver")
+    results = relationship("Result", back_populates = "driver")
     laps = relationship("Lap", back_populates="driver")
 
     def __repr__(self):
@@ -94,6 +94,9 @@ class Result(Base):
 # DATABASE SETUP
 DATABASE_URL = "sqlite:///data/database.db"
 engine = create_engine(DATABASE_URL, echo=False)
+
+# CREATE SessionLocal HERE - This was missing!
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_database():
     """Create all tables"""
