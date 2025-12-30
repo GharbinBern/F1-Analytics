@@ -32,7 +32,7 @@ def transform_race_data(extracted_data):
     # Handle nulls
     for col in ['LapTimeSeconds', 'Compound', 'TyreLife', 'Stint']:
         if col in laps_clean.columns:
-            laps_clean[col] = laps_clean[col].where(pd.notna(laps_clean[col]), None)
+            laps_clean[col] = laps_clean[col].astype(object).where(pd.notna(laps_clean[col]), None)
 
 
     # Transform results

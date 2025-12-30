@@ -96,7 +96,7 @@ class Result(Base):
 DATABASE_URL = "sqlite:///data/database.db"
 engine = create_engine(DATABASE_URL, echo=False)
 
-# CREATE SessionLocal HERE - This was missing!
+# CREATE SessionLocal
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_database():
