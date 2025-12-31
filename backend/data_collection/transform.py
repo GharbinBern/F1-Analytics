@@ -55,10 +55,16 @@ def transform_race_data(extracted_data):
     # Convert to Python native types 
     laps_clean['LapNumber'] = laps_clean['LapNumber'].astype(int)
     laps_clean['LapTimeSeconds'] = laps_clean['LapTimeSeconds'].astype(float)
-    laps_clean['TyreLife'] = laps_clean['TyreLife'].astype('Int64')  
-    laps_clean['Stint'] = laps_clean['Stint'].astype('Int64')
+    # laps_clean['TyreLife'] = laps_clean['TyreLife'].astype(int)  
+    # laps_clean['Stint'] = laps_clean['Stint'].astype(int)
     laps_clean['IsPersonalBest'] = laps_clean['IsPersonalBest'].astype(bool)
-
+    # Convert nullable integers - handle NA values properly
+    laps_clean['TyreLife'] = laps_clean['TyreLife'].apply(
+        lambda x: int(x) if pd.notna(x) else None
+    )
+    laps_clean['Stint'] = laps_clean['Stint'].apply(
+        lambda x: int(x) if pd.notna(x) else None
+    )
     race_info = {
         'year': extracted_data['year'],
         'race_name': extracted_data['race_name'],
