@@ -85,6 +85,16 @@ def add_result(db, race_id, driver_id, position, grid_position, points, status):
     return result
 
 def add_lap(db, race_id, driver_id, lap_data):
+    # check if lap already exists
+    existing_lap = db.query(Lap).filter(
+        Lap.race_id == race_id,
+        Lap.driver_id == driver_id,
+        Lap.lap_number == lap_data['LapNumber']
+    ).first()
+
+    if existing_lap:
+        return None  # Skip if lap already exists
+
     # LOAD laps
     lap = Lap(
         race_id=race_id,
@@ -122,6 +132,11 @@ def load_race_data(transformed_data):
     try:
         # 1. LOAD race
         race, is_new = add_race(db, race_info)
+        
+        # If race already exists, check if we need to reload data
+        if not is_new:
+            print("    Race already exists. Skipping data load.")
+            return True
     
 
         # 2. LOAD drivers

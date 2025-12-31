@@ -103,4 +103,4 @@ if __name__ == "__main__":
     # run_full_season(2024, ['Bahrain', 'Saudi Arabia', 'Australia'])
     
     # Or load full season 
-    run_full_season(2020)
+    run_full_season(2024)
