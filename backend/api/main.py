@@ -42,9 +42,10 @@ def read_root():
     }
 
 # Include routes
-from routes import drivers, races
+from routes import drivers, races, laps
 app.include_router(drivers.router, prefix="/api/v1")
 app.include_router(races.router, prefix="/api/v1")
+app.include_router(laps.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
