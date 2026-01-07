@@ -1,0 +1,40 @@
+:root {
+  --font-sans: 'Space Grotesk', 'Segoe UI', 'Helvetica Neue', sans-serif;
+
+  --bg: #050915;
+  --bg-strong: #040714;
+  --surface: #0b1224;
+  --surface-strong: #0f172a;
+  --surface-soft: #0a1020;
+  --border: #1b2940;
+
+  --text-primary: #e8eeff;
+  --text-secondary: #b2bdd7;
+  --text-muted: #7c88a3;
+
+  --accent: #3ae2ff;
+  --accent-strong: #7cfbde;
+  --accent-warm: #ff9f43;
+
+  --success: #2dd4bf;
+  --danger: #f87171;
+  --warning: #fbbf24;
+
+  --shadow-soft: 0 10px 40px rgba(3, 8, 20, 0.35);
+  --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.45);
+
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 22px;
+
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 44px;
+  --space-8: 60px;
+
+  --max-width: 1280px;
+}
