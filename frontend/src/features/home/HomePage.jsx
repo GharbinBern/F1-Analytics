@@ -1,8 +1,8 @@
 import Card from '../../components/Card'
 
 const stats = [
-  { label: 'Latest Winner', value: 'Max Verstappen', detail: 'Abu Dhabi GP' },
-  { label: 'Current Season', value: '2025', detail: 'Round 18 of 24' },
+  { label: 'Latest Winner', value: 'Lando Norris', detail: "Driver's Championship Winner" },
+  { label: 'Current Season', value: '2025', detail: 'Round 24 of 24' },
   { label: 'Pole vs Win %', value: '62%', detail: 'Correlation this season' },
 ]
 
@@ -94,7 +94,7 @@ function HomePage() {
           </Card>
           <Card title="Standout metrics" subtitle="Surface-level deltas; connect data later">
             <p className="section-note">
-              Hook up the backend API to replace these placeholders with live pace gaps, tire stints, and pit
+              TO DO: Hook up the backend API to replace these placeholders with live pace gaps, tire stints, and pit
               windows. Each section is wired to accept data from `api` once endpoints are ready.
             </p>
           </Card>
