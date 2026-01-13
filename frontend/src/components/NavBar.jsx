@@ -5,7 +5,7 @@ const links = [
   { href: '/races', label: 'Races' },
   { href: '/drivers', label: 'Drivers' },
   { href: '/teams', label: 'Teams' },
-  { href: '/laps', label: 'Lap Analytics' },
+  { href: '/laps', label: 'Laps' },
 ]
 
 function NavBar() {
