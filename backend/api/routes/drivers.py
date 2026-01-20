@@ -40,26 +40,64 @@ def get_db():
 
 
 @router.get("/")
-def get_all_drivers(db: Session = Depends(get_db)):
+def get_all_drivers(
+    season: int = Query(None, description="Filter drivers by season"),
+    db: Session = Depends(get_db)
+):
     """
-    Get all drivers
+    Get all drivers, optionally filtered by season
     
-    Returns list of all drivers in database
+    Args:
+        season: Optional season year to filter drivers who competed in that season
+    
+    Returns list of drivers
     """
-    drivers = db.query(Driver).all()
-    
-    return {
-        "count": len(drivers),
-        "drivers": [
-            {
-                "id": driver.id,
-                "code": driver.driver_code,
-                "name": driver.driver_name,
-                "number": driver.driver_number
+    if season:
+        # Get races in season
+        races = db.query(Race).filter(Race.year == season).all()
+        race_ids = [race.id for race in races]
+        
+        if not race_ids:
+            return {
+                "season": season,
+                "count": 0,
+                "drivers": []
             }
-            for driver in drivers
-        ]
-    }
+        
+        # Get unique drivers who competed in that season
+        drivers = db.query(Driver).join(Result).filter(
+            Result.race_id.in_(race_ids)
+        ).distinct().all()
+        
+        return {
+            "season": season,
+            "count": len(drivers),
+            "drivers": [
+                {
+                    "id": driver.id,
+                    "code": driver.driver_code,
+                    "name": driver.driver_name,
+                    "number": driver.driver_number
+                }
+                for driver in drivers
+            ]
+        }
+    else:
+        # Return all drivers
+        drivers = db.query(Driver).all()
+        
+        return {
+            "count": len(drivers),
+            "drivers": [
+                {
+                    "id": driver.id,
+                    "code": driver.driver_code,
+                    "name": driver.driver_name,
+                    "number": driver.driver_number
+                }
+                for driver in drivers
+            ]
+        }
 
 
 @router.get("/compare")

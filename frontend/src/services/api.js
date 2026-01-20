@@ -13,7 +13,8 @@ async function request(path) {
 }
 
 export const api = {
-  drivers: () => request(`${API_PREFIX}/drivers`),
+  drivers: (season = null) => 
+    request(`${API_PREFIX}/drivers${season ? `?season=${season}` : ''}`),
   driver: (code) => request(`${API_PREFIX}/drivers/${code}`),
   driverStats: (code, season = 2024) =>
     request(`${API_PREFIX}/drivers/${code}/stats?season=${season}`),
@@ -27,4 +28,6 @@ export const api = {
   teams: (season) => request(`${API_PREFIX}/teams?season=${season}`),
   team: (id) => request(`${API_PREFIX}/teams/${id}`),
   laps: (raceId) => request(`${API_PREFIX}/laps/${raceId}`),
+  fastestLaps: (season = 2024, limit = 8) =>
+    request(`${API_PREFIX}/laps/fastest?season=${season}&limit=${limit}`),
 }
