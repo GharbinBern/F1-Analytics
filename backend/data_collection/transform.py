@@ -65,10 +65,10 @@ def transform_race_data(extracted_data):
     laps_clean['Stint'] = laps_clean['Stint'].apply(
         lambda x: int(x) if pd.notna(x) else None
     )
+    # Use EventName for consistency (e.g., "Australian Grand Prix" not "Australia")
     race_info = {
         'year': extracted_data['year'],
-        'race_name': extracted_data['race_name'],
-        'event_name': session.event['EventName'],
+        'race_name': session.event['EventName'],  # Use full event name from FastF1
         'event_date': session.event['EventDate'],
         'location': session.event.get('Location'),
         'country': session.event.get('Country')

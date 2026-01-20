@@ -66,8 +66,13 @@ def run_full_season(year, races=None):
     schedule = fastf1.get_event_schedule(year)
     
     if races is None:
-        # Load all races
-        race_list = schedule['EventName'].tolist()
+        # Load all races, excluding pre-season testing and non-GP events
+        race_events = schedule[
+            (schedule['EventFormat'] == 'conventional') &
+            (~schedule['EventName'].str.contains('Testing|Test', case=False, na=False))
+        ]
+        race_list = race_events['EventName'].tolist()
+        print(f"Filtered to {len(race_list)} races (excluded testing/non-GP events)")
     else:
         race_list = races
     
