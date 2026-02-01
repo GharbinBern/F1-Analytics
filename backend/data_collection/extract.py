@@ -21,13 +21,22 @@ def extract_race(year, race_name):
 
     laps_raw = session.laps
     results_raw = session.results
-    # drivers_raw = session.drivers
+
+    sprint_results_raw = None
+    try:
+        sprint_session = fastf1.get_session(year, race_name, 'S')
+        sprint_session.load()
+        sprint_results_raw = sprint_session.results
+        print("EXTRACT: Sprint session found and loaded")
+    except Exception:
+        print("EXTRACT: No sprint session for this event")
 
     # Return everything as a dictionary
     return {
         'session': session,
         'laps_raw': laps_raw,
         'results_raw': results_raw,
+        'sprint_results_raw': sprint_results_raw,
         'year': year,
         'race_name': race_name
     }

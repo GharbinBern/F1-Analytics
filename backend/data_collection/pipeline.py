@@ -68,8 +68,7 @@ def run_full_season(year, races=None):
     if races is None:
         # Load all races, excluding pre-season testing and non-GP events
         race_events = schedule[
-            (schedule['EventFormat'] == 'conventional') &
-            (~schedule['EventName'].str.contains('Testing|Test', case=False, na=False))
+            ~schedule['EventName'].str.contains('Testing|Test', case=False, na=False)
         ]
         race_list = race_events['EventName'].tolist()
         print(f"Filtered to {len(race_list)} races (excluded testing/non-GP events)")
@@ -84,7 +83,7 @@ def run_full_season(year, races=None):
     for race_name in race_list:
         success = run_etl_pipeline(year, race_name)
         results.append((race_name, success))
-        print()  # Blank line between races
+        print()  
     
     # Summary
     print(f"\n{'='*100}")
@@ -100,12 +99,34 @@ def run_full_season(year, races=None):
         print(f"  {status} {race_name}")
 
 
+def run_all_seasons(years=None):
+    """
+    Load multiple seasons
+    
+    Args:
+        years (list): List of years, or None for default [2020-2025]
+    """
+    if years is None:
+        years = [2020, 2021, 2022, 2023, 2024, 2025]
+    
+    print(f"\n{'='*100}")
+    print(f"LOADING {len(years)} SEASONS: {years}")
+    print(f"{'='*100}\n")
+    
+    for year in years:
+        run_full_season(year)
+        print() 
+
+
 if __name__ == "__main__":
     # Test single race
     # run_etl_pipeline(2024, 'Monaco')
     
-    # Or load specific races
+    # load specific races
     # run_full_season(2024, ['Bahrain', 'Saudi Arabia', 'Australia'])
     
-    # Or load full season 
-    run_full_season(2021)
+    # load full season 
+    # run_full_season(2021)
+    
+    # load all seasons
+    run_all_seasons()

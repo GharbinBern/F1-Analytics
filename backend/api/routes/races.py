@@ -5,6 +5,7 @@ Race-related API endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 import sys
 import os
 
@@ -94,7 +95,8 @@ def get_race_results(race_id: int, db: Session = Depends(get_db)):
     
     # Get results with driver info
     results = db.query(Result, Driver).join(Driver).filter(
-        Result.race_id == race_id
+        Result.race_id == race_id,
+        or_(Result.session_type == 'R', Result.session_type.is_(None))
     ).order_by(Result.position).all()
     
     return {

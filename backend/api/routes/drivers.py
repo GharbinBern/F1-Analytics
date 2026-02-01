@@ -5,7 +5,7 @@ Driver-related API endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 import sys
 import os
 
@@ -151,28 +151,29 @@ def compare_driver(
         ).all()
         
         total_points = sum(r.points for r in results if r.points)
-        
+
+        race_results = [r for r in results if (r.session_type or 'R') == 'R']
         finishes = []
-        for r in results:
+        for r in race_results:
             pos = _to_int_or_none(r.position)
             if pos is not None:
                 finishes.append(pos)
         avg_finish = sum(finishes) / len(finishes) if finishes else None
         
-        lap_times = [l.lap_time_seconds for l in laps]
-        avg_lap_time = sum(lap_times) / len(lap_times) if lap_times else None
-        fastest_lap = min(lap_times) if lap_times else None
+        # Calculate wins and podiums
+        wins = sum(1 for pos in finishes if pos == 1)
+        podiums = sum(1 for pos in finishes if pos <= 3)
         
         return {
             "code": driver.driver_code,
             "name": driver.driver_name,
             "number": driver.driver_number,
-            "races_entered": len(results),
+            "races_entered": len(race_results),
             "total_points": round(total_points, 1) if total_points else 0,
             "average_finish_position": round(avg_finish, 2) if avg_finish else None,
-            "total_laps": len(laps),
-            "average_lap_time": round(avg_lap_time, 3) if avg_lap_time else None,
-            "fastest_lap": round(fastest_lap, 3) if fastest_lap else None
+            "wins": wins,
+            "podiums": podiums,
+            "total_laps": len(laps)
         }
     
     stats1 = get_driver_comparison_stats(driver1, race_ids)
@@ -258,17 +259,18 @@ def get_driver_stats(
     
     # Calculate statistics
     total_points = sum(r.points for r in results if r.points)
-    
+
+    race_results = [r for r in results if (r.session_type or 'R') == 'R']
     finishes = []
-    for r in results:
+    for r in race_results:
         pos = _to_int_or_none(r.position)
         if pos is not None:
             finishes.append(pos)
     avg_finish = sum(finishes) / len(finishes) if finishes else None
     
-    lap_times = [l.lap_time_seconds for l in laps]
-    avg_lap_time = sum(lap_times) / len(lap_times) if lap_times else None
-    fastest_lap = min(lap_times) if lap_times else None
+    # Calculate wins and podiums
+    wins = sum(1 for pos in finishes if pos == 1)
+    podiums = sum(1 for pos in finishes if pos <= 3)
     
     return {
         "driver": {
@@ -278,12 +280,12 @@ def get_driver_stats(
         },
         "season": season,
         "stats": {
-            "races_entered": len(results),
+            "races_entered": len(race_results),
             "total_points": round(total_points, 1) if total_points else 0,
             "average_finish_position": round(avg_finish, 2) if avg_finish else None,
-            "total_laps": len(laps),
-            "average_lap_time": round(avg_lap_time, 3) if avg_lap_time else None,
-            "fastest_lap": round(fastest_lap, 3) if fastest_lap else None
+            "wins": wins,
+            "podiums": podiums,
+            "total_laps": len(laps)
         }
     }
 
@@ -309,7 +311,8 @@ def get_driver_races(
     # Get races with results
     results = db.query(Result, Race).join(Race).filter(
         Result.driver_id == driver.id,
-        Race.year == season
+        Race.year == season,
+        or_(Result.session_type == 'R', Result.session_type.is_(None))
     ).all()
     
     return {

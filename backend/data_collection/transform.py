@@ -36,21 +36,30 @@ def transform_race_data(extracted_data):
 
 
     # Transform results
+    def clean_results(results_raw, session_type):
+        results_clean = results_raw[[
+            'DriverNumber', 'Abbreviation', 'BroadcastName',
+            'ClassifiedPosition', 'GridPosition', 'Points', 'Status', 'TeamName'
+        ]].copy()
+
+        # Handle nulls - convert to object dtype to store Python None
+        for col in ['ClassifiedPosition', 'GridPosition', 'Points']:
+            if col in results_clean.columns:
+                results_clean[col] = results_clean[col].astype(object).where(pd.notna(results_clean[col]), None)
+
+        results_clean['ClassifiedPosition'] = (
+            results_clean['ClassifiedPosition'].replace('R', None)
+        )
+        results_clean['session_type'] = session_type
+        return results_clean
+
     results_raw = extracted_data['results_raw']
+    results_clean = clean_results(results_raw, 'R')
 
-    # Select needed columns
-    results_clean = results_raw[[
-        'DriverNumber', 'Abbreviation', 'BroadcastName',
-        'ClassifiedPosition', 'GridPosition', 'Points', 'Status', 'TeamName'
-    ]].copy()
-
-    # Handle nulls - convert to object dtype to store Python None
-    for col in ['ClassifiedPosition', 'GridPosition', 'Points']:
-        if col in results_clean.columns:
-            results_clean[col] = results_clean[col].astype(object).where(pd.notna(results_clean[col]), None)
-
-    results_clean['ClassifiedPosition'] = (results_clean['ClassifiedPosition']
-    .replace('R', None))
+    sprint_results_raw = extracted_data.get('sprint_results_raw')
+    sprint_results_clean = (
+        clean_results(sprint_results_raw, 'S') if sprint_results_raw is not None else None
+    )
 
     # Convert to Python native types 
     laps_clean['LapNumber'] = laps_clean['LapNumber'].astype(int)
@@ -77,7 +86,8 @@ def transform_race_data(extracted_data):
     return {
         'race_info': race_info,
         'laps_clean': laps_clean,
-        'results_clean': results_clean
+        'results_clean': results_clean,
+        'sprint_results_clean': sprint_results_clean
     }
 
 if __name__ == "__main__":

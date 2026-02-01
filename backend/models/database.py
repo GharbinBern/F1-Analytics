@@ -82,6 +82,7 @@ class Result(Base):
     grid_position = Column(Integer, nullable= True)
     points = Column(Float, nullable=True)
     status = Column(String, nullable=True)
+    session_type = Column(String, nullable=False, default='R')
 
     driver = relationship("Driver", back_populates="results")
     race = relationship("Race", back_populates="results")

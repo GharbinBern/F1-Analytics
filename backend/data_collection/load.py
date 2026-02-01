@@ -11,13 +11,14 @@ def add_driver(db, driver_code, driver_number, driver_name=None):
     existing_driver = db.query(Driver).filter(
         Driver.driver_code == driver_code
     ).first()
+    
+    print("  - Loading drivers...")
 
     if existing_driver:
         print(f"    Driver already exists (ID: {existing_driver.id}). Skipping...")
         return existing_driver
   
     # LOAD driver
-    print("  - Loading drivers...")
     driver = Driver(
         driver_code = driver_code,
         driver_name = driver_name,
@@ -27,7 +28,7 @@ def add_driver(db, driver_code, driver_number, driver_name=None):
     db.commit()
     db.refresh(driver)
 
-    print(f"Driver loaded (CODE: {driver_code})")
+    print(f"    Driver loaded (CODE: {driver_code})")
 
     return driver    
 
@@ -38,12 +39,13 @@ def add_race(db, race_info):
         Race.race_name == race_info["race_name"]
     ).first()
 
+    print("  - Loading race record...")
+
     if existing_race:
         print(f"    Race already exists (ID: {existing_race.id}). Skipping...")
         return existing_race, False
     
     # LOAD race
-    print("  - Loading race record...")
     race = Race(
         year= race_info['year'],
         race_name= race_info['race_name'],
@@ -55,15 +57,16 @@ def add_race(db, race_info):
     db.commit()
     db.refresh(race)
     
-    print(f"Race loaded (ID: {race.id})")
+    print(f"    Race loaded (ID: {race.id})")
 
     return race, True
 
-def add_result(db, race_id, driver_id, position, grid_position, points, status):
-    # check if race already exists
+def add_result(db, race_id, driver_id, position, grid_position, points, status, session_type):
+    # check if result already exists for this session
     existing_results = db.query(Result).filter(
         Result.race_id == race_id,
-        Result.driver_id == driver_id
+        Result.driver_id == driver_id,
+        Result.session_type == session_type
     ).first()
 
     if existing_results:
@@ -77,7 +80,8 @@ def add_result(db, race_id, driver_id, position, grid_position, points, status):
             position= position,
             grid_position= grid_position,
             points= points,
-            status= status
+            status= status,
+            session_type=session_type
         )
     db.add(result)
     db.flush()  # ensure ID is available before logging
@@ -125,7 +129,7 @@ def load_race_data(transformed_data):
     laps_clean = transformed_data["laps_clean"]
     results_clean = transformed_data["results_clean"]
 
-    print(f"LOAD: Inserting {race_info['race_name']} into database...")
+    print(f"LOAD: Inserting {race_info['race_name']} into database")
 
     db = SessionLocal()
 
@@ -133,46 +137,51 @@ def load_race_data(transformed_data):
         # 1. LOAD race
         race, is_new = add_race(db, race_info)
         
-        # If race already exists, check if we need to reload data
+        # If race already exists, continue to load missing results/laps
         if not is_new:
-            print("    Race already exists. Skipping data load.")
-            return True
-    
+            print("    Race already exists. Loading any missing results/laps")
 
         # 2. LOAD drivers
         driver_map = {}  # Map driver_code -> driver object
-        
+
+        sprint_results_clean = transformed_data.get("sprint_results_clean")
+        results_frames = [results_clean]
+        if sprint_results_clean is not None:
+            results_frames.append(sprint_results_clean)
+        all_results = pd.concat(results_frames, ignore_index=True)
+
         # Get unique drivers from results (has full names)
-        for _, result_row in results_clean.iterrows():
+        for _, result_row in all_results.iterrows():
             driver_code = result_row['Abbreviation']
-            
+
             if driver_code not in driver_map:
                 driver_map[driver_code] = add_driver(
-                    db, 
-                    driver_code, 
-                    result_row['DriverNumber'], 
+                    db,
+                    driver_code,
+                    result_row['DriverNumber'],
                     result_row['BroadcastName']
                 )
-                
+
         print(f"    Processed {len(driver_map)} drivers")
 
 
         # 3. LOAD results
-        print("  - Loading race results...")
+        print("  - Loading results")
         result_count = 0
 
-        for _, result_row in results_clean.iterrows():
+        for _, result_row in all_results.iterrows():
             driver_code = result_row['Abbreviation']
             driver = driver_map[driver_code]
 
             add_result(
-                db, 
-                race.id, 
-                driver.id, 
+                db,
+                race.id,
+                driver.id,
                 result_row['ClassifiedPosition'],
                 result_row['GridPosition'],
                 result_row['Points'] or 0.0,
-                result_row['Status']
+                result_row['Status'],
+                result_row['session_type']
             )
             result_count += 1
 
@@ -181,7 +190,7 @@ def load_race_data(transformed_data):
         print(f"    Loaded {result_count} results")
         
         # 4. LOAD laps
-        print(f"  - Loading laps...")
+        print(f"  - Loading laps")
         lap_count = 0
         
         for _, lap_row in laps_clean.iterrows():
@@ -207,7 +216,7 @@ def load_race_data(transformed_data):
         # Final commit for remaining laps
         db.commit()
         print(f"    Loaded {lap_count} laps")
-        print(f"SUCCESS: {race_info['race_name']} loaded!")
+        print(f"SUCCESS: {race_info['race_name']} loaded")
         return True
         
     except Exception as e:
@@ -224,7 +233,7 @@ if __name__ == "__main__":
     from extract import extract_race
     from transform import transform_race_data
 
-    print("Testing ETL pipeline...")
+    print("Testing ETL pipeline")
     print("="*100)
 
     extracted = extract_race(2025, 'Austin')
