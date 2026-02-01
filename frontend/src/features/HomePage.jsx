@@ -24,16 +24,6 @@ function HomePage() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const {
-    data: fastestData,
-    isPending: fastestPending,
-    isError: fastestError,
-  } = useQuery({
-    queryKey: ['fastest-laps', SEASON],
-    queryFn: () => api.fastestLaps(SEASON, 6),
-    staleTime: 5 * 60 * 1000,
-  })
-
   const driverResults = useQueries({
     queries: SPOTLIGHT_DRIVERS.map(({ code }) => ({
       queryKey: ['driver-stats', code, SEASON, 'home'],
@@ -43,6 +33,35 @@ function HomePage() {
   })
 
   const races = racesData?.races ?? []
+
+  const completedRaces = useMemo(() => {
+    const now = new Date()
+    return races
+      .filter((race) => race.date && new Date(race.date) <= now)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 6)
+  }, [races])
+
+  const recentResults = useQueries({
+    queries: completedRaces.map((race) => ({
+      queryKey: ['race-results', race.id],
+      queryFn: () => api.raceResults(race.id),
+      staleTime: 5 * 60 * 1000,
+      enabled: Boolean(race.id),
+    })),
+  })
+
+  const recentWinners = useMemo(() => {
+    return completedRaces.map((race, idx) => {
+      const resultQuery = recentResults[idx]
+      const winner = resultQuery.data?.results?.find((r) => r.position === 1)
+      return {
+        race,
+        winner: winner?.driver_name || 'TBD',
+        loading: resultQuery.isPending,
+      }
+    })
+  }, [completedRaces, recentResults])
 
   const { nextRace, lastRace, completed, totalRaces, progressPct, countdownDays } = useMemo(() => {
     const now = new Date()
@@ -67,9 +86,6 @@ function HomePage() {
 
     return { nextRace, lastRace, completed, totalRaces, progressPct, countdownDays }
   }, [races])
-
-  const fastestLaps = fastestData?.fastest_laps ?? []
-  const lapLeader = fastestLaps[0]
 
   const leaderboard = useMemo(() => {
     return driverResults
@@ -130,13 +146,9 @@ function HomePage() {
                 <span className="spark">{completed}/{totalRaces || '—'}</span>
               </div>
               <div className="sparkline-row">
-                <span className="sparkline-label">Fastest lap leader</span>
+                <span className="sparkline-label">Most recent winner</span>
                 <span className="spark">
-                  {lapLeader
-                    ? `${lapLeader.driver_name} · ${formatSeconds(lapLeader.lap_time)}s`
-                    : fastestPending
-                      ? 'Loading'
-                      : 'No laps yet'}
+                  {lastRace ? `${lastRace.name}` : 'No races yet'}
                 </span>
               </div>
               <div className="sparkline-row">
@@ -249,12 +261,6 @@ function HomePage() {
             </div>
             <div className="meta-grid">
               <div className="metric-row">
-                <div className="metric-label">Lap-time benchmark</div>
-                <div className="metric-value">
-                  {lapLeader ? `${lapLeader.driver_name} · ${formatSeconds(lapLeader.lap_time)}s` : fastestPending ? 'Loading' : '—'}
-                </div>
-              </div>
-              <div className="metric-row">
                 <div className="metric-label">Next runway</div>
                 <div className="metric-value">
                   {nextRace
@@ -275,28 +281,32 @@ function HomePage() {
         <div className="section-header">
           <div>
             <h2 className="section-title">Performance board</h2>
-            <p className="section-subtitle">Fastest laps and a quick leaderboard for the spotlight drivers.</p>
+            <p className="section-subtitle">Recent race winners and the spotlight driver leaderboard.</p>
           </div>
-          <a className="button" href="/laps">Lap browser</a>
+          <a className="button" href="/races">All races</a>
         </div>
 
         <div className="grid two">
-          <Card title="Fastest laps" subtitle={`Top ${fastestLaps.length || 0} laps in season ${SEASON}`}>
-            {fastestPending ? (
+          <Card title="Recent winners" subtitle={`Last ${recentWinners.length} completed races`}>
+            {racesPending ? (
               <Skeleton lines={6} />
-            ) : fastestError ? (
-              <p className="section-note">Fastest lap data unavailable.</p>
-            ) : fastestLaps.length === 0 ? (
-              <p className="section-note">No lap-time records yet.</p>
+            ) : racesError ? (
+              <p className="section-note">Race data unavailable.</p>
+            ) : recentWinners.length === 0 ? (
+              <p className="section-note">No races completed yet this season.</p>
             ) : (
               <ul className="list-plain">
-                {fastestLaps.map((lap, idx) => (
-                  <li key={`${lap.driver_code}-${lap.lap_number}-${lap.race}`} className="lap-item">
+                {recentWinners.map(({ race, winner, loading }, idx) => (
+                  <li key={race.id} className="lap-item">
                     <div>
-                      <p className="lap-title">#{idx + 1} · {lap.driver_name}</p>
-                      <p className="lap-sub">{lap.race} · Lap {lap.lap_number}</p>
+                      <p className="lap-title">
+                        {loading ? 'Loading winner...' : winner}
+                      </p>
+                      <p className="lap-sub">
+                        {race.name} · {race.date ? new Date(race.date).toLocaleDateString() : 'Date TBD'}
+                      </p>
                     </div>
-                    <span className="badge">{formatSeconds(lap.lap_time)}s</span>
+                    <span className="badge">Round {races.indexOf(race) + 1}</span>
                   </li>
                 ))}
               </ul>

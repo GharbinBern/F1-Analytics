@@ -3,9 +3,70 @@ import { useQuery } from '@tanstack/react-query'
 import Card from '../components/Card'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
+import CustomSelect from '../components/CustomSelect'
 import { api } from '../services/api'
+import './DriverList.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
+
+function DriverStatsCard({
+  driverCode,
+  drivers,
+  driverInfo,
+  stats,
+  statsPending,
+  statsError,
+  statsErrorObj,
+  onDriverChange,
+  onRetry,
+}) {
+  const statItems = [
+    { label: 'Races entered', value: stats?.races_entered },
+    { label: 'Total points', value: stats?.total_points },
+    { label: 'Average finish position', value: stats?.average_finish_position },
+    { label: 'Wins', value: stats?.wins },
+    { label: 'Podiums', value: stats?.podiums },
+    { label: 'Total laps', value: stats?.total_laps },
+  ]
+
+  return (
+    <Card
+      title={driverInfo?.name ?? driverCode}
+      subtitle={`Driver #${driverInfo?.number ?? '—'}`}
+    >
+      <div className="filter-bar driver-list__filter-bar">
+        <CustomSelect
+          value={driverCode}
+          onChange={onDriverChange}
+          options={drivers.map((driver) => ({
+            value: driver.code,
+            label: `${driver.number ? `#${driver.number}` : ''} ${driver.name || driver.code}`.trim()
+          }))}
+          placeholder="Select driver"
+        />
+      </div>
+
+      {statsError ? (
+        <ErrorBanner message={statsErrorObj?.message} onRetry={onRetry} />
+      ) : statsPending ? (
+        <Skeleton lines={6} />
+      ) : stats ? (
+        <div className="driver-list__stat-grid">
+          {statItems.map((item) => (
+            <div key={item.label}>
+              <p className="stat-label">{item.label}</p>
+              <div className="stat-value driver-list__stat-value">
+                {item.value ?? '—'}{item.suffix ?? ''}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="section-note">No data available for this driver.</p>
+      )}
+    </Card>
+  )
+}
 
 function DriverList() {
   const [season, setSeason] = useState(2025)
@@ -78,19 +139,17 @@ function DriverList() {
           <h2 className="section-title">Driver comparison</h2>
           <p className="section-subtitle">Head-to-head season analysis</p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-          <select 
-            className="select" 
-            value={season} 
-            onChange={(e) => setSeason(Number(e.target.value))}
-            style={{ minWidth: '120px' }}
-          >
-            {AVAILABLE_SEASONS.map((year) => (
-              <option key={year} value={year}>
-                Season {year}
-              </option>
-            ))}
-          </select>
+        <div className="driver-list__controls">
+          <CustomSelect
+            className="driver-list__season-select"
+            value={season}
+            onChange={(val) => setSeason(Number(val))}
+            options={AVAILABLE_SEASONS.map((year) => ({
+              value: year,
+              label: `Season ${year}`
+            }))}
+            placeholder="Select season"
+          />
           <span className="pill">
             {driversData?.count ?? 0} drivers
           </span>
@@ -106,133 +165,30 @@ function DriverList() {
           <p className="section-note">No driver data available for season {season}.</p>
         </div>
       ) : (
-        <div className="grid two" style={{ alignItems: 'start' }}>
-          {/* Driver 1 */}
-          <Card 
-            title={getDriverInfo(driver1)?.name ?? driver1} 
-            subtitle={`Driver #${getDriverInfo(driver1)?.number ?? '—'}`}
-          >
-            <div className="filter-bar" style={{ justifyContent: 'flex-start', marginBottom: 'var(--space-4)' }}>
-              <select 
-                className="select" 
-                value={driver1} 
-                onChange={(e) => setDriver1(e.target.value)}
-                style={{ minWidth: '220px' }}
-              >
-                {drivers.map((driver) => (
-                  <option key={driver.code} value={driver.code}>
-                    {driver.number ? `#${driver.number}` : ''} {driver.name || driver.code}
-                  </option>
-                ))}
-              </select>
-              <button 
-                className="button secondary" 
-                type="button" 
-                onClick={() => refetchStats1()}
-              >
-                Refresh
-              </button>
-            </div>
-
-          {stats1Error ? (
-            <ErrorBanner message={stats1ErrorObj?.message} onRetry={refetchStats1} />
-          ) : stats1Pending ? (
-            <Skeleton lines={6} />
-          ) : stats1 ? (
-            <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
-              <div>
-                <p className="stat-label">Races entered</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.races_entered ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Total points</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.total_points ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Average finish position</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.average_finish_position ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Total laps</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.total_laps ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Average lap time</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.average_lap_time ?? '—'}s</div>
-              </div>
-              <div>
-                <p className="stat-label">Fastest lap</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats1.fastest_lap ?? '—'}s</div>
-              </div>
-            </div>
-          ) : (
-            <p className="section-note">No data available for this driver.</p>
-          )}
-        </Card>
-
-        {/* Driver 2 */}
-        <Card 
-          title={getDriverInfo(driver2)?.name ?? driver2} 
-          subtitle={`Driver #${getDriverInfo(driver2)?.number ?? '—'}`}
-        >
-          <div className="filter-bar" style={{ justifyContent: 'flex-start', marginBottom: 'var(--space-4)' }}>
-            <select 
-              className="select" 
-              value={driver2} 
-              onChange={(e) => setDriver2(e.target.value)}
-              style={{ minWidth: '220px' }}
-            >
-              {drivers.map((driver) => (
-                <option key={driver.code} value={driver.code}>
-                  {driver.number ? `#${driver.number}` : ''} {driver.name || driver.code}
-                </option>
-              ))}
-            </select>
-            <button 
-              className="button secondary" 
-              type="button" 
-              onClick={() => refetchStats2()}
-            >
-              Refresh
-            </button>
-          </div>
-
-          {stats2Error ? (
-            <ErrorBanner message={stats2ErrorObj?.message} onRetry={refetchStats2} />
-          ) : stats2Pending ? (
-            <Skeleton lines={6} />
-          ) : stats2 ? (
-            <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
-              <div>
-                <p className="stat-label">Races entered</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.races_entered ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Total points</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.total_points ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Average finish position</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.average_finish_position ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Total laps</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.total_laps ?? '—'}</div>
-              </div>
-              <div>
-                <p className="stat-label">Average lap time</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.average_lap_time ?? '—'}s</div>
-              </div>
-              <div>
-                <p className="stat-label">Fastest lap</p>
-                <div className="stat-value" style={{ fontSize: '28px' }}>{stats2.fastest_lap ?? '—'}s</div>
-              </div>
-            </div>
-          ) : (
-            <p className="section-note">No data available for this driver.</p>
-          )}
-        </Card>
-      </div>
+        <div className="grid two driver-list__comparison-grid">
+          <DriverStatsCard
+            driverCode={driver1}
+            drivers={drivers}
+            driverInfo={getDriverInfo(driver1)}
+            stats={stats1}
+            statsPending={stats1Pending}
+            statsError={stats1Error}
+            statsErrorObj={stats1ErrorObj}
+            onDriverChange={setDriver1}
+            onRetry={refetchStats1}
+          />
+          <DriverStatsCard
+            driverCode={driver2}
+            drivers={drivers}
+            driverInfo={getDriverInfo(driver2)}
+            stats={stats2}
+            statsPending={stats2Pending}
+            statsError={stats2Error}
+            statsErrorObj={stats2ErrorObj}
+            onDriverChange={setDriver2}
+            onRetry={refetchStats2}
+          />
+        </div>
       )}
     </section>
   )

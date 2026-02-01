@@ -25,6 +25,7 @@ export const api = {
 
   races: (season) => request(`${API_PREFIX}/races?season=${season}`),
   race: (id) => request(`${API_PREFIX}/races/${id}`),
+  raceResults: (raceId) => request(`${API_PREFIX}/races/${raceId}/results`),
   teams: (season) => request(`${API_PREFIX}/teams?season=${season}`),
   team: (id) => request(`${API_PREFIX}/teams/${id}`),
   laps: (raceId) => request(`${API_PREFIX}/laps/${raceId}`),
