@@ -1,0 +1,32 @@
+.races__controls {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.races__race-button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(224, 224, 224, 0.8);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.races__race-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(225, 6, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.races__race-button.is-active {
+  border-color: rgba(225, 6, 0, 0.55);
+  background: rgba(225, 6, 0, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(225, 6, 0, 0.15);
+}

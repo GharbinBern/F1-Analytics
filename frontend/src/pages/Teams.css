@@ -1,0 +1,11 @@
+.teams__controls {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.teams__metrics {
+  display: grid;
+  gap: 8px;
+}
