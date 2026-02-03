@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Card from '../components/Card'
+import HelmetIcon from '../components/HelmetIcon'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
 import CustomSelect from '../components/CustomSelect'
@@ -8,6 +9,7 @@ import { api } from '../services/api'
 import './Driver.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
+
 
 function DriverStatsCard({
   driverCode,
@@ -31,7 +33,16 @@ function DriverStatsCard({
 
   return (
     <Card
-      title={driverInfo?.name ?? driverCode}
+      title={
+        <span className="driver-list__card-title">
+          <HelmetIcon
+            label={`${driverInfo?.name ?? driverCode} helmet`}
+            size={36}
+            teamName={driverInfo?.team}
+          />
+          <span>{driverInfo?.name ?? driverCode}</span>
+        </span>
+      }
       subtitle={`Driver #${driverInfo?.number ?? '—'}`}
     >
       <div className="filter-bar driver-list__filter-bar">
@@ -133,7 +144,7 @@ function DriverList() {
   const getDriverInfo = (code) => drivers.find(d => d.code === code)
 
   return (
-    <section className="section">
+    <section className="section section--fill">
       <div className="section-header">
         <div>
           <h2 className="section-title">Driver comparison</h2>

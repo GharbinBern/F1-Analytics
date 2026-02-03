@@ -5,6 +5,7 @@ import CustomSelect from '../components/CustomSelect'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
 import { api } from '../services/api'
+import { getTeamCssVars, getTeamColors } from '../utils/teamColors'
 import './Teams.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
@@ -94,6 +95,7 @@ function TeamsPage() {
 
   const performance = performanceData?.stats
   const pitStops = pitStopsData?.stats
+  const teamTheme = getTeamColors(selectedTeam)
 
   return (
     <section className="section">
@@ -130,7 +132,10 @@ function TeamsPage() {
         <Skeleton lines={4} />
       ) : (
         <div className="grid two">
-          <Card title="Team performance" subtitle={selectedTeam || 'Select a team'}>
+          <Card
+            title="Team performance"
+            subtitle={(teamTheme?.name ?? selectedTeam) || 'Select a team'}
+          >
             {performanceError ? (
               <ErrorBanner
                 message={performanceErrorObj?.message ?? 'Unable to load performance stats.'}

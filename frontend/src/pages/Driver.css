@@ -25,3 +25,14 @@
 .driver-list__stat-value {
   font-size: 28px;
 }
+
+.driver-list__card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.driver-list__card-title .helmet-icon {
+  width: 36px;
+  height: 36px;
+}

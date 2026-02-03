@@ -9,3 +9,24 @@
   display: grid;
   gap: 8px;
 }
+
+.teams__theme .section-title {
+  color: var(--team-primary, var(--text-primary));
+}
+
+.teams__theme .pill,
+.teams__theme .badge {
+  background: color-mix(in srgb, var(--team-primary, var(--accent)) 18%, transparent);
+  color: var(--team-primary, var(--accent));
+  border-color: color-mix(in srgb, var(--team-primary, var(--accent)) 35%, transparent);
+}
+
+.teams__theme .metric-value {
+  color: var(--team-primary, var(--text-primary));
+  font-weight: 700;
+}
+
+.teams__theme .card {
+  border-color: color-mix(in srgb, var(--team-primary, var(--border)) 30%, var(--border));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--team-primary, rgba(0, 0, 0, 0.08)) 35%, rgba(0, 0, 0, 0.08));
+}

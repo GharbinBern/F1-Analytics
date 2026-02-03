@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import Card from '../components/Card'
+import HelmetIcon from '../components/HelmetIcon'
 import Skeleton from '../components/Skeleton'
 import { api } from '../services/api'
 
@@ -122,6 +123,39 @@ function HomePage() {
             <div className="hero-actions">
               <a className="button" href="/drivers">Driver comparison</a>
               <a className="button secondary" href="/races">Race calendar</a>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="hero-visual__content">
+              <div className="hero-helmet-row">
+                {SPOTLIGHT_DRIVERS.map((driver) => (
+                  <div key={driver.code} className="hero-helmet">
+                    <HelmetIcon
+                      label={`${driver.code} helmet`}
+                      size={46}
+                      teamName={driver.team}
+                    />
+                    <span>{driver.code}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="hero-track-card">
+                <div className="hero-track-header">
+                  <span className="hero-track-title">Live track overlay</span>
+                  <span className="badge">Telemetry</span>
+                </div>
+                <div className="hero-track-map" aria-hidden="true" />
+                <div className="hero-track-metrics">
+                  <div>
+                    <p className="mini-title">DRS zones</p>
+                    <p className="mini-sub">3 active</p>
+                  </div>
+                  <div>
+                    <p className="mini-title">Avg pace</p>
+                    <p className="mini-sub">1:18.4</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

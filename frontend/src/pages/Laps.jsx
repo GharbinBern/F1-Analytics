@@ -145,7 +145,7 @@ function LapsPage() {
   }, [filteredLaps, driverFilter])
 
   return (
-    <section className="section">
+    <section className="section section--fill">
       <div className="section-header">
         <div>
           <h2 className="section-title">Lap telemetry</h2>

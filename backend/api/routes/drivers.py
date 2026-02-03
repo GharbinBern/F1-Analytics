@@ -68,19 +68,34 @@ def get_all_drivers(
         drivers = db.query(Driver).join(Result).filter(
             Result.race_id.in_(race_ids)
         ).distinct().all()
-        
+
+        driver_entries = []
+        for driver in drivers:
+            team_row = (
+                db.query(Lap.team, func.count(Lap.id).label("team_count"))
+                .join(Race, Lap.race_id == Race.id)
+                .filter(
+                    Lap.driver_id == driver.id,
+                    Race.year == season
+                )
+                .group_by(Lap.team)
+                .order_by(func.count(Lap.id).desc())
+                .first()
+            )
+            team_name = team_row[0] if team_row else None
+
+            driver_entries.append({
+                "id": driver.id,
+                "code": driver.driver_code,
+                "name": driver.driver_name,
+                "number": driver.driver_number,
+                "team": team_name
+            })
+
         return {
             "season": season,
             "count": len(drivers),
-            "drivers": [
-                {
-                    "id": driver.id,
-                    "code": driver.driver_code,
-                    "name": driver.driver_name,
-                    "number": driver.driver_number
-                }
-                for driver in drivers
-            ]
+            "drivers": driver_entries
         }
     else:
         # Return all drivers
