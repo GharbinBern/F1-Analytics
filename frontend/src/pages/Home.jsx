@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useQueries, useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import Card from '../components/Card'
 import HelmetIcon from '../components/HelmetIcon'
 import Skeleton from '../components/Skeleton'
@@ -40,7 +41,7 @@ function HomePage() {
     return races
       .filter((race) => race.date && new Date(race.date) <= now)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 6)
+      .slice(0, 5)
   }, [races])
 
   const recentResults = useQueries({
@@ -121,8 +122,8 @@ function HomePage() {
               an F1-styled cockpit.
             </p>
             <div className="hero-actions">
-              <a className="button" href="/drivers">Driver comparison</a>
-              <a className="button secondary" href="/races">Race calendar</a>
+              <Link className="button" to="/drivers">Driver comparison</Link>
+              <Link className="button secondary" to="/races">Race calendar</Link>
             </div>
           </div>
           <div className="hero-visual">
@@ -271,7 +272,7 @@ function HomePage() {
             <h2 className="section-title">Performance board</h2>
             <p className="section-subtitle">Recent race winners and the spotlight driver leaderboard.</p>
           </div>
-          <a className="button" href="/races">All races</a>
+          <Link className="button" to="/races">All races</Link>
         </div>
 
         <div className="grid two">

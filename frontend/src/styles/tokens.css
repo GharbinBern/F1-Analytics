@@ -6,6 +6,10 @@
   --surface: #fafafa;
   --surface-strong: #f0f0f0;
   --surface-soft: #fcfcfc;
+  --surface-glass: rgba(255, 255, 255, 0.92);
+  --surface-panel: rgba(255, 255, 255, 0.88);
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --checker-color: rgba(225, 6, 0, 0.1);
   --border: #e0e0e0;
 
   --text-primary: #1a1a1a;
@@ -37,4 +41,21 @@
   --space-8: 60px;
 
   --max-width: 1280px;
+}
+
+[data-theme='dark'] {
+  --bg: #0c0f14;
+  --bg-strong: #0f141c;
+  --surface: #141a22;
+  --surface-strong: #1a2230;
+  --surface-soft: #10151d;
+  --surface-glass: rgba(12, 15, 20, 0.94);
+  --surface-panel: rgba(20, 26, 34, 0.9);
+  --card-bg: rgba(18, 24, 32, 0.92);
+  --checker-color: rgba(255, 255, 255, 0.04);
+  --border: #2a3342;
+
+  --text-primary: #f4f6fb;
+  --text-secondary: #c6d0dd;
+  --text-muted: #95a2b2;
 }

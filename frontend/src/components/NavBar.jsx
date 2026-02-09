@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 const links = [
@@ -9,6 +10,25 @@ const links = [
 ]
 
 function NavBar() {
+  const [theme, setTheme] = useState('light')
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    const nextTheme = savedTheme || (prefersDark ? 'dark' : 'light')
+    setTheme(nextTheme)
+    document.documentElement.dataset.theme = nextTheme
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
+  }
+
   return (
     <header className="navbar">
       <div className="brand" aria-label="F1 Analytics">
@@ -27,6 +47,11 @@ function NavBar() {
           </NavLink>
         ))}
       </nav>
+      <div className="nav-footer">
+        <button type="button" className="theme-toggle" onClick={toggleTheme} aria-pressed={theme === 'dark'}>
+          <span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
+        </button>
+      </div>
     </header>
   )
 }

@@ -5,6 +5,10 @@
   flex-wrap: wrap;
 }
 
+.laps__header {
+  align-items: flex-start;
+}
+
 .laps__metrics {
   display: grid;
   gap: 8px;

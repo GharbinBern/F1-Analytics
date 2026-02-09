@@ -5,6 +5,10 @@
   flex-wrap: wrap;
 }
 
+.teams__header {
+  align-items: flex-start;
+}
+
 .teams__metrics {
   display: grid;
   gap: 8px;

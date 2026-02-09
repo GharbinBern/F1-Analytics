@@ -99,7 +99,7 @@ function TeamsPage() {
 
   return (
     <section className="section">
-      <div className="section-header">
+      <div className="section-header teams__header">
         <div>
           <h2 className="section-title">Team performance</h2>
           <p className="section-subtitle">Compare team race pace, points, and pit execution.</p>

@@ -146,7 +146,7 @@ function LapsPage() {
 
   return (
     <section className="section section--fill">
-      <div className="section-header">
+      <div className="section-header laps__header">
         <div>
           <h2 className="section-title">Lap telemetry</h2>
           <p className="section-subtitle">Inspect lap pace trends and fastest laps for the season.</p>
