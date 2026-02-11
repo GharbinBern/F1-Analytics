@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 
 const links = [
@@ -10,24 +10,29 @@ const links = [
 ]
 
 function NavBar() {
-  const [theme, setTheme] = useState('light')
-
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    const nextTheme = savedTheme || (prefersDark ? 'dark' : 'light')
-    setTheme(nextTheme)
-    document.documentElement.dataset.theme = nextTheme
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const applyTheme = (isDark) => {
+      document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
+    }
+
+    applyTheme(mediaQuery.matches)
+
+    const handleChange = (event) => applyTheme(event.matches)
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange)
+    } else {
+      mediaQuery.addListener(handleChange)
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange)
+      } else {
+        mediaQuery.removeListener(handleChange)
+      }
+    }
   }, [])
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
-  }
 
   return (
     <header className="navbar">
@@ -47,11 +52,6 @@ function NavBar() {
           </NavLink>
         ))}
       </nav>
-      <div className="nav-footer">
-        <button type="button" className="theme-toggle" onClick={toggleTheme} aria-pressed={theme === 'dark'}>
-          <span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</span>
-        </button>
-      </div>
     </header>
   )
 }
