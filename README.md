@@ -1,11 +1,20 @@
 # F1 Analytics
 
-Track F1 race performance, compare drivers, and explore team trends from a single analytics dashboard. Full-stack Formula 1 analytics workspace with a FastAPI backend, a React + Vite frontend, and a FastF1-powered data pipeline.
+F1 Analytics is a full-stack dashboard for tracking race weekends, comparing drivers, and reviewing team performance. The backend is FastAPI + SQLite, the frontend is React + Vite, and the data pipeline is powered by FastF1.
 
 ## Features
-- FastAPI API for drivers, races, laps, and team performance.
-- React dashboard with comparison views, race calendar, and telemetry summaries.
-- ETL pipeline that extracts data from FastF1 and loads it into SQLite.
+- Season calendar tracking (next race, completed rounds, progress).
+- Driver comparison with points, average finishes, wins, podiums, and total laps.
+- Race results with finishing order, grid position, points, and status.
+- Team performance and pit stop analytics.
+
+## Demo
+![F1 Analytics demo](frontend/public/assets/demo.gif)
+
+## How it works
+- **Data source:** FastF1 (session data cached locally).
+- **Storage:** SQLite database at `data/database.db`.
+- **Refresh cadence:** run the pipeline manually when you want fresh data; cached pulls live in `notebook/cache`.
 
 ## Tech Stack
 - Backend: FastAPI, SQLAlchemy, SQLite
@@ -73,7 +82,6 @@ The app runs at http://localhost:5173 by default.
 ### 3) Configure API Base URL (optional)
 The frontend reads `VITE_API_URL` from your environment. If not set, it defaults to http://localhost:8000.
 
-
 ## Data Pipeline
 The ETL pipeline pulls session data from FastF1, cleans it, and loads it into SQLite at `data/database.db`.
 
@@ -82,11 +90,11 @@ Run the pipeline:
 python backend/data_collection/pipeline.py
 ```
 
-The FastF1 cache is stored in `notebook/cache` to speed up repeated downloads.
-
-
 ## Notebooks
 Exploratory analysis lives in `notebook/explore_data.ipynb`.
+
+
+
 
 
 

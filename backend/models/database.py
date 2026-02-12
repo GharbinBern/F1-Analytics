@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, Float, String, Boolean, ForeignKey,DateTime ,  create_engine
+    Column, Integer, Float, String, Boolean, ForeignKey, DateTime, Index, create_engine
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
@@ -9,6 +9,11 @@ Base = declarative_base()
 class Lap(Base):        
     """Stores individual lap data"""    
     __tablename__ = "laps"
+    __table_args__ = (
+        Index("ix_laps_team", "team"),
+        Index("ix_laps_race_id", "race_id"),
+        Index("ix_laps_driver_id", "driver_id"),
+    )
 
     id = Column(Integer, primary_key=True, index= True)
     race_id = Column(ForeignKey("races.id"), nullable= False)
@@ -36,6 +41,9 @@ class Lap(Base):
 class Race(Base):
     """Stores information about each Grand Prix"""
     __tablename__ = "races"
+    __table_args__ = (
+        Index("ix_races_year", "year"),
+    )
 
     id = Column(Integer, primary_key=True, index= True)
 
@@ -73,6 +81,10 @@ class Driver(Base):
 class Result(Base):
     """Stores final race results"""
     __tablename__ = 'results'
+    __table_args__ = (
+        Index("ix_results_race_id", "race_id"),
+        Index("ix_results_driver_id", "driver_id"),
+    )
 
     id = Column(Integer, primary_key=True, index= True)
 
