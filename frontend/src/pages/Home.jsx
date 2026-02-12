@@ -117,9 +117,8 @@ function HomePage() {
             <span className="hero-kicker">Season {SEASON} dashboard</span>
             <h1 className="hero-title">F1 race breakdown: pace, stints, and track form.</h1>
             <p className="hero-copy">
-              Track where the lap-time edge comes from, who is carrying qualifying momentum, and how the next stint
-              should shape up. Dive into driver head-to-heads and calendar context with
-              an F1-styled cockpit.
+            Monitor season progression and view past races. Analyze driver performance through points, positions, podiums, 
+            and consistency. Break down team strategies with pit stop metrics and lap time comparisons across the grid.
             </p>
             <div className="hero-actions">
               <Link className="button" to="/drivers">Driver comparison</Link>
@@ -224,7 +223,7 @@ function HomePage() {
                     <li className="lap-item">
                       <div>
                         <p className="mini-title">Next step</p>
-                        <p className="mini-sub">Select a driver to overlay lap traces or pull team pit-stop shapes.</p>
+                        <p className="mini-sub"> .</p>
                       </div>
                     </li>
                   </>
