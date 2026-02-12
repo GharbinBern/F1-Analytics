@@ -5,7 +5,16 @@ import CustomSelect from '../components/CustomSelect'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
 import { api } from '../services/api'
-import { getTeamCssVars, getTeamColors } from '../utils/teamColors'
+import { getTeamColors } from '../utils/teamColors'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import './Teams.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
@@ -81,21 +90,27 @@ function TeamsPage() {
   })
 
   const {
-    data: pitStopsData,
-    isPending: pitStopsPending,
-    isError: pitStopsError,
-    error: pitStopsErrorObj,
-    refetch: refetchPitStops,
+    data: pointsData,
+    isPending: pointsPending,
+    isError: pointsError,
+    error: pointsErrorObj,
+    refetch: refetchPoints,
   } = useQuery({
-    queryKey: ['team-pit-stops', selectedTeam, season],
-    queryFn: () => api.teamPitStops(selectedTeam, season),
+    queryKey: ['team-points-per-race', selectedTeam, season],
+    queryFn: () => api.teamPointsPerRace(selectedTeam, season),
     enabled: Boolean(selectedTeam),
     staleTime: 3 * 60 * 1000,
   })
 
   const performance = performanceData?.stats
-  const pitStops = pitStopsData?.stats
+  const pointsSeries = pointsData?.points ?? []
   const teamTheme = getTeamColors(selectedTeam)
+  const pointsChartData = useMemo(() => {
+    return pointsSeries.map((point, index) => ({
+      ...point,
+      round: index + 1,
+    }))
+  }, [pointsSeries])
 
   return (
     <section className="section">
@@ -174,44 +189,45 @@ function TeamsPage() {
               <p className="section-note">{performanceData?.message ?? 'No team data available.'}</p>
             )}
           </Card>
-
-          <Card title="Pit stop analysis" subtitle="Stint strategy and pit cadence">
-            {pitStopsError ? (
+          <Card title="Points per race" subtitle="Points scored in each round">
+            {pointsError ? (
               <ErrorBanner
-                message={pitStopsErrorObj?.message ?? 'Unable to load pit stop stats.'}
-                onRetry={refetchPitStops}
+                message={pointsErrorObj?.message ?? 'Unable to load points per race.'}
+                onRetry={refetchPoints}
               />
-            ) : pitStopsPending ? (
-              <Skeleton lines={6} />
-            ) : pitStops ? (
-              <div className="teams__metrics">
-                <div className="metric-row">
-                  <span className="metric-label">Total pit stops</span>
-                  <span className="metric-value">{pitStops.total_pit_stops ?? '—'}</span>
-                </div>
-                <div className="metric-row">
-                  <span className="metric-label">Races with pit stops</span>
-                  <span className="metric-value">{pitStops.races_with_pit_stops ?? '—'}</span>
-                </div>
-                <div className="metric-row">
-                  <span className="metric-label">Average stops per race</span>
-                  <span className="metric-value">{pitStops.average_stops_per_race ?? '—'}</span>
-                </div>
-                <div className="metric-row">
-                  <span className="metric-label">Average pit time</span>
-                    <span className="metric-value">{formatSeconds(pitStops.average_pit_time_seconds)}</span>
-                </div>
-                <div className="metric-row">
-                  <span className="metric-label">Fastest pit time</span>
-                    <span className="metric-value">{formatSeconds(pitStops.fastest_pit_time_seconds)}</span>
-                </div>
-                <div className="metric-row">
-                  <span className="metric-label">Slowest pit time</span>
-                    <span className="metric-value">{formatSeconds(pitStops.slowest_pit_time_seconds)}</span>
+            ) : pointsPending ? (
+              <Skeleton lines={3} />
+            ) : pointsSeries.length === 0 ? (
+              <p className="section-note">No points data available for this team.</p>
+            ) : (
+              <div className="teams__chart">
+                <div className="teams__chart-wrap">
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={pointsChartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(225, 6, 0, 0.2)" />
+                      <XAxis
+                        dataKey="round"
+                        tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
+                        tickFormatter={(value) => `R${value}`}
+                      />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <Tooltip
+                        labelFormatter={(label, payload) => {
+                          const raceName = payload?.[0]?.payload?.race_name
+                          return raceName ? `Round ${label} · ${raceName}` : `Round ${label}`
+                        }}
+                        contentStyle={{
+                          background: 'var(--surface-strong)',
+                          border: '2px solid var(--border)',
+                          borderRadius: 6,
+                          color: 'var(--text-primary)',
+                        }}
+                      />
+                      <Bar dataKey="points" fill={teamTheme.primary ?? 'var(--accent)'} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-            ) : (
-              <p className="section-note">{pitStopsData?.message ?? 'No pit stop data available.'}</p>
             )}
           </Card>
         </div>
