@@ -5,6 +5,17 @@ import CustomSelect from '../components/CustomSelect'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
 import { api } from '../services/api'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { getTeamColors } from '../utils/teamColors'
 import './Races.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
@@ -81,6 +92,14 @@ function RacesPage() {
     })
   }, [results])
 
+  const pointsChartData = useMemo(() => {
+    return sortedResults.slice(0, 10).map((result) => ({
+      name: result.driver_code ?? result.driver_name ?? '—',
+      points: Number(result.points ?? 0),
+      team: result.team ?? '',
+    }))
+  }, [sortedResults])
+
   return (
     <section className="section">
       <div className="section-header">
@@ -100,7 +119,7 @@ function RacesPage() {
       </div>
 
       <div className="grid two">
-        <Card title="Race list" subtitle="Tap a race to load results">
+        <Card title="Races" subtitle="Tap a race to load results">
           {racesError ? (
             <ErrorBanner message={racesErrorObj?.message ?? 'Unable to load races.'} onRetry={refetchRaces} />
           ) : racesPending ? (
@@ -142,29 +161,59 @@ function RacesPage() {
           ) : results.length === 0 ? (
             <p className="section-note">Select a race to view results.</p>
           ) : (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Pos</th>
-                    <th>Driver</th>
-                    <th>Grid</th>
-                    <th>Points</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedResults.map((result) => (
-                    <tr key={`${result.driver_code}-${result.position}`}>
-                      <td>{result.position ?? '—'}</td>
-                      <td>{result.driver_name ?? result.driver_code}</td>
-                      <td>{result.grid_position ?? '—'}</td>
-                      <td>{result.points ?? 0}</td>
-                      <td>{result.status ?? '—'}</td>
+            <div className="races__results">
+              <div className="races__chart">
+                <p className="races__chart-title">Points by driver (Top 10)</p>
+                <div className="races__chart-wrap">
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={pointsChartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(225, 6, 0, 0.2)" />
+                      <XAxis dataKey="name" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'var(--surface-strong)',
+                          border: '2px solid var(--border)',
+                          borderRadius: 6,
+                          color: 'var(--text-primary)',
+                        }}
+                      />
+                      <Bar dataKey="points" radius={[4, 4, 0, 0]}>
+                        {pointsChartData.map((entry) => (
+                          <Cell
+                            key={`cell-${entry.name}`}
+                            fill={getTeamColors(entry.team).primary}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Pos</th>
+                      <th>Driver</th>
+                      <th>Grid</th>
+                      <th>Points</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {sortedResults.map((result) => (
+                      <tr key={`${result.driver_code}-${result.position}`}>
+                        <td>{result.position ?? '—'}</td>
+                        <td>{result.driver_name ?? result.driver_code}</td>
+                        <td>{result.grid_position ?? '—'}</td>
+                        <td>{result.points ?? 0}</td>
+                        <td>{result.status ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </Card>

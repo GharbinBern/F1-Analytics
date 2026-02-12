@@ -5,7 +5,7 @@ Race-related API endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 import sys
 import os
 
@@ -93,8 +93,21 @@ def get_race_results(race_id: int, db: Session = Depends(get_db)):
     if not race:
         raise HTTPException(status_code=404, detail=f"Race {race_id} not found")
     
-    # Get results with driver info
-    results = db.query(Result, Driver).join(Driver).filter(
+    team_lookup = db.query(
+        Lap.driver_id,
+        func.min(Lap.team).label("team")
+    ).filter(
+        Lap.race_id == race_id
+    ).group_by(Lap.driver_id).subquery()
+
+    # Get results with driver and team info
+    results = db.query(Result, Driver, team_lookup.c.team).select_from(Result).join(
+        Driver,
+        Result.driver_id == Driver.id
+    ).outerjoin(
+        team_lookup,
+        team_lookup.c.driver_id == Driver.id
+    ).filter(
         Result.race_id == race_id,
         or_(Result.session_type == 'R', Result.session_type.is_(None))
     ).order_by(Result.position).all()
@@ -112,9 +125,10 @@ def get_race_results(race_id: int, db: Session = Depends(get_db)):
                 "driver_name": driver.driver_name,
                 "grid_position": result.grid_position,
                 "points": result.points,
-                "status": result.status
+                "status": result.status,
+                "team": team
             }
-            for result, driver in results
+            for result, driver, team in results
         ]
     }
 
