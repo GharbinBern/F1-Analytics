@@ -5,6 +5,15 @@ import CustomSelect from '../components/CustomSelect'
 import ErrorBanner from '../components/ErrorBanner'
 import Skeleton from '../components/Skeleton'
 import { api } from '../services/api'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import './Laps.css'
 
 const AVAILABLE_SEASONS = [2025, 2024, 2023, 2022, 2021, 2020]
@@ -81,6 +90,29 @@ function LapsPage() {
     ? lapTimes.reduce((sum, value) => sum + Math.pow(value - avgLapTime, 2), 0) / lapTimes.length
     : null
   const lapStdDev = lapVariance !== null ? Math.sqrt(lapVariance) : null
+
+  const lapHistogram = useMemo(() => {
+    if (!lapTimes.length) return []
+    const min = Math.min(...lapTimes)
+    const max = Math.max(...lapTimes)
+    const bins = 8
+    const size = (max - min) / bins || 1
+    const buckets = Array.from({ length: bins }, (_, idx) => ({
+      start: min + idx * size,
+      end: min + (idx + 1) * size,
+      count: 0,
+    }))
+
+    lapTimes.forEach((value) => {
+      const index = Math.min(bins - 1, Math.floor((value - min) / size))
+      buckets[index].count += 1
+    })
+
+    return buckets.map((bucket) => ({
+      label: `${bucket.start.toFixed(1)}-${bucket.end.toFixed(1)}s`,
+      count: bucket.count,
+    }))
+  }, [lapTimes])
 
 
   const compoundSummary = useMemo(() => {
@@ -188,6 +220,27 @@ function LapsPage() {
               <p className="section-note">No lap data available for this race.</p>
             ) : (
               <div className="laps__metrics">
+                <div className="laps__chart">
+                  <p className="laps__chart-title">Lap time distribution</p>
+                  <div className="laps__chart-wrap">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={lapHistogram} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(225, 6, 0, 0.2)" />
+                        <XAxis dataKey="label" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+                        <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
+                        <Tooltip
+                          contentStyle={{
+                            background: 'var(--surface-strong)',
+                            border: '2px solid var(--border)',
+                            borderRadius: 6,
+                            color: 'var(--text-primary)',
+                          }}
+                        />
+                        <Bar dataKey="count" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
                 <div className="metric-row">
                   <span className="metric-label">Total laps</span>
                   <span className="metric-value">{filteredLaps.length}</span>
