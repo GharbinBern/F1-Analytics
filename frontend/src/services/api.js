@@ -36,4 +36,6 @@ export const api = {
     request(`${API_PREFIX}/team/${encodeURIComponent(team)}/performance?season=${season}`),
   teamPitStops: (team, season = 2024) =>
     request(`${API_PREFIX}/team/${encodeURIComponent(team)}/pit-stops?season=${season}`),
+  teamPointsPerRace: (team, season = 2024) =>
+    request(`${API_PREFIX}/team/${encodeURIComponent(team)}/points-per-race?season=${season}`),
 }
