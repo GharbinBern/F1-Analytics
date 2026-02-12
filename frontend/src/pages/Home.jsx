@@ -109,16 +109,30 @@ function HomePage() {
       .sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
   }, [driverResults])
 
+  const spotlightLeader = leaderboard[0]
+  const spotlightRunnerUp = leaderboard[1]
+  const leaderPointsPerRace = spotlightLeader?.races
+    ? (spotlightLeader.points / spotlightLeader.races).toFixed(2)
+    : null
+  const leaderGap =
+    spotlightLeader && spotlightRunnerUp
+      ? (spotlightLeader.points ?? 0) - (spotlightRunnerUp.points ?? 0)
+      : null
+
   return (
     <>
       <section className="section">
         <div className="hero">
           <div>
             <span className="hero-kicker">Season {SEASON} dashboard</span>
-            <h1 className="hero-title">F1 race breakdown: pace, stints, and track form.</h1>
+            <h1 className="hero-title">F1 Cockpit</h1>
             <p className="hero-copy">
-            Monitor season progression and view past races. Analyze driver performance through points, positions, podiums, 
-            and consistency. Break down team strategies with pit stop metrics and lap time comparisons across the grid.
+              <span className="hero-copy__line">
+                Track the championship, analyze team strategies, and explore race data from past and present.
+              </span>
+              <span className="hero-copy__line">
+                Compare drivers across seasons, then dive into results and lap traces when you want the detail.
+              </span>
             </p>
             <div className="hero-actions">
               <Link className="button" to="/drivers">Driver comparison</Link>
@@ -141,20 +155,34 @@ function HomePage() {
               </div>
               <div className="hero-track-card">
                 <div className="hero-track-header">
-                  <span className="hero-track-title">Live track overlay</span>
-                  <span className="badge">Telemetry</span>
+                  <span className="hero-track-title">Spotlight metrics</span>
                 </div>
-                <div className="hero-track-map" aria-hidden="true" />
-                <div className="hero-track-metrics">
-                  <div>
-                    <p className="mini-title">DRS zones</p>
-                    <p className="mini-sub">3 active</p>
+                {driverResults.some((q) => q.isPending) ? (
+                  <Skeleton lines={3} />
+                ) : leaderboard.length === 0 ? (
+                  <p className="section-note">No spotlight stats available yet.</p>
+                ) : (
+                  <div className="hero-track-metrics">
+                    <div>
+                      <p className="mini-title">Leader</p>
+                      <p className="mini-sub">
+                        {spotlightLeader?.name ?? 'TBD'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mini-title">Points per race</p>
+                      <p className="mini-sub">
+                        {leaderPointsPerRace ?? '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="mini-title">Gap to P2</p>
+                      <p className="mini-sub">
+                        {leaderGap !== null ? `${leaderGap} pts` : '—'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="mini-title">Avg pace</p>
-                    <p className="mini-sub">1:18.4</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -234,7 +262,7 @@ function HomePage() {
             )}
           </Card>
 
-          <Card title="Season pulse" subtitle="Progress markers and pace anchors">
+          <Card title="Season pulse" subtitle="Progress markers">
             <div className="progress" style={{ marginBottom: 'var(--space-4)' }}>
               <div className="progress-head">
                 <p className="sparkline-label">Calendar coverage</p>

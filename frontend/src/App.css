@@ -22,6 +22,7 @@
   font-weight: 700;
   border: 2px solid rgba(225, 6, 0, 0.35);
   box-shadow: 0 0 12px rgba(225, 6, 0, 0.3);
+  margin-bottom: var(--space-2);
 }
 
 .hero-copy {
@@ -29,12 +30,21 @@
   color: var(--text-secondary);
   font-size: 16px;
   line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.hero-copy__line {
+  display: block;
 }
 
 .hero-actions {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
+  margin-top: var(--space-2);
 }
 
 .hero-visual {
